@@ -34,7 +34,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='genienlp',
-    version='0.4.0',
+    version='0.4.1',
     
     packages=setuptools.find_packages(exclude=['tests']),
     entry_points= {
@@ -66,6 +66,7 @@ setuptools.setup(
         'wordfreq==2.3.2',
         'elasticsearch==7.9.1',
         'ujson==1.35',
-        'marisa_trie==0.7.5'
-    ]
-)
+        'marisa_trie==0.7.5',
+        'bootleg @ git+ssh://git@github.com/Mehrad0711/bootleg@master',
+    ],
+    )
