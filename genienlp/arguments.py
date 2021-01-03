@@ -33,7 +33,6 @@ import json
 import logging
 import os
 import subprocess
-import torch
 
 from .tasks.registry import get_tasks
 from .util import have_multilingual
@@ -62,12 +61,8 @@ def parse_argv(parser):
     parser.add_argument('--embeddings', default='.embeddings', type=str, help='where to save embeddings.')
     parser.add_argument('--cache', default='.cache/', type=str, help='where to save cached files')
 
-    parser.add_argument('--train_languages', type=str,
-                        help='used to specify dataset languages used during training for multilingual tasks'
-                             'multiple languages for each task should be concatenated with +')
-    parser.add_argument('--eval_languages', type=str,
-                        help='used to specify dataset languages used during validation for multilingual tasks'
-                             'multiple languages for each task should be concatenated with +')
+    parser.add_argument('--train_languages', type=str, nargs='+', help='Specify dataset languages used during training for multilingual tasks')
+    parser.add_argument('--eval_languages', type=str, nargs='+', help='Specify dataset languages used during validation for multilingual tasks')
 
     parser.add_argument('--train_tasks', nargs='+', type=str, dest='train_task_names', help='tasks to use for training',
                         required=True)
@@ -207,9 +202,9 @@ def post_parse(args):
     args.timestamp = datetime.datetime.now(tz=datetime.timezone.utc).strftime('%D-%H:%M:%S %Z')
     
     # TODO relax the following assertions by dropping samples from batches in Iterator
-    if args.sentence_batching and args.train_batch_tokens[0] % len(args.train_languages.split('+')) != 0:
+    if args.sentence_batching and args.train_batch_tokens[0] % len(args.train_languages) != 0:
         raise ValueError('Your train_batch_size should be divisible by number of train_languages when using sentence batching.')
-    if args.sentence_batching and args.val_batch_size[0] % len(args.eval_languages.split('+')) != 0:
+    if args.sentence_batching and args.val_batch_size[0] % len(args.eval_languages) != 0:
         raise ValueError('Your val_batch_size should be divisible by number of eval_languages when using sentence batching.')
     
     if args.warmup < 1:

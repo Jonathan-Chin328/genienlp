@@ -440,7 +440,7 @@ class BaseAlmondMultiLingualTask(BaseAlmondTask):
     def get_splits(self, root, **kwargs):
         all_datasets = []
         # number of directories to read data from
-        all_dirs = kwargs['all_dirs'].split('+')
+        all_dirs = kwargs['all_dirs']
         
         for dir in all_dirs:
             almond_dataset = AlmondDataset.return_splits(path=os.path.join(root, 'almond/multilingual/{}'.format(dir)),

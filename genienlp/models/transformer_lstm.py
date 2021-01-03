@@ -101,7 +101,7 @@ class TransformerLSTM(GenieModel):
             context_rnn_state = torch.cat(context_rnn_state, dim=0)
             
         batch_size = context_rnn_state.size(1)
-        groups = len(self.args.train_languages.split('+'))
+        groups = len(self.args.train_languages)
         assert batch_size % groups == 0
         
         # reshape to be (batch_size; -1)
