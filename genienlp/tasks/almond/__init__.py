@@ -47,7 +47,7 @@ from ..generic_dataset import CQA, context_answer_len, token_batch_fn, default_b
 from ...data_utils.example import Example
 from ...data_utils.database import Database, LocalElasticDatabase, RemoteElasticDatabase, DOMAIN_TYPE_MAPPING
 from ...data_utils.bootleg import BootlegAnnotator
-from ...util import es_dump_type2id, es_dump_canonical2type, is_chinese_char
+from ...util import es_dump_type2id, es_dump_canonical2type, is_chinese_char, es_dump_qid2typeid
 
 from ..base_dataset import Split
 
@@ -319,7 +319,8 @@ class BaseAlmondTask(BaseTask):
             self.db = RemoteElasticDatabase(es_config, unk_id, all_aliases, type2id, alias2qid, qid2typeid)
             if self.args.create_type_mapping:
                 # es_dump_type2id(self.db)
-                es_dump_canonical2type(self.db)
+                # es_dump_canonical2type(self.db)
+                es_dump_qid2typeid(self.db)
         
         self.TTtype2DBtype = dict()
         for domain in self.args.almond_domains:

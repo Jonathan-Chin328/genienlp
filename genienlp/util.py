@@ -399,8 +399,6 @@ def es_dump_canonical2type(db):
             db.canonical2type = {}
         
         try:
-            # if i==3:
-            #     break
             result = db.es.scroll(scroll_id=scroll_id, scroll='1d')
             total_values += len(result["hits"]["hits"])
             if len(result["hits"]["hits"]) < 10:
@@ -413,7 +411,13 @@ def es_dump_canonical2type(db):
             i += 1
         except:
             break
-    
+            
+        finally:
+            with open('dataset/canonical2type_{}.json'.format(chunk), 'w') as fout:
+                json.dump(db.canonical2type, fout, ensure_ascii=True)
+            chunk += 1
+            db.canonical2type = {}
+
     # with open('dataset/canonical2type.json', 'w') as fout:
     #     json.dump(db.canonical2type, fout, ensure_ascii=False)
         
@@ -454,6 +458,49 @@ def es_dump_type2id(db):
         json.dump(db.type2id, fout)
     exit(1)
 
+
+def es_dump_qid2typeid(db):
+    import time
+    begin = time.time()
+    
+    excess_length = len('org.wikidata:')
+    
+    body = {"size": 10000, "query": {"match_all": {}}}
+    result = db.es.search(index=db.index, body=body, scroll='1d')
+    print("total docs:", len(result["hits"]["hits"]))
+    for match in result["hits"]["hits"]:
+        db.qid2typeid[match['_source']['value']] = match['_source']['type'][excess_length:]
+    
+    scroll_id = result['_scroll_id']
+    i = 0
+    chunk = 0
+    total_values = 10000
+    while True:
+        if total_values % 4000000 == 0:
+            with open(f'dataset/qid2typeid_{chunk}.json', 'w') as fout:
+                json.dump(db.qid2typeid, fout, ensure_ascii=True)
+            chunk += 1
+            db.qid2typeid = {}
+        
+        try:
+            result = db.es.scroll(scroll_id=scroll_id, scroll='1d')
+            total_values += len(result["hits"]["hits"])
+            if len(result["hits"]["hits"]) < 10:
+                break
+            print("total docs:", total_values)
+            for match in result["hits"]["hits"]:
+                db.qid2typeid[match['_source']['value']] = match['_source']['type'][excess_length:]
+            scroll_id = result['_scroll_id']
+            print('processed: {}, time elapsed: {}'.format(i, time.time() - begin))
+            i += 1
+        except:
+            break
+        
+    
+    with open(f'dataset/qid2typeid_{chunk}.json', 'w') as fout:
+        json.dump(db.qid2typeid, fout, ensure_ascii=False)
+    
+    exit(1)
 
 def elapsed_time(log):
     t = time.time() - log.start
