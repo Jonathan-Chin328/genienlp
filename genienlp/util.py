@@ -45,6 +45,21 @@ from .data_utils.iterator import Iterator
 logger = logging.getLogger(__name__)
 
 
+def reverse_bisect_left(a, x, lo=0, hi=None):
+    """Insert item x in list a, and keep it reverse-sorted assuming a
+    is reverse-sorted.
+    """
+    if hi is None:
+        hi = len(a)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if x > a[mid]:
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+
+
 class SpecialTokenMap:
     def __init__(self, pattern, forward_func, backward_func=None):
         """
